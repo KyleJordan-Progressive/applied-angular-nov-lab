@@ -27,4 +27,9 @@ export const routes: Routes = [
     loadChildren: () =>
       import('./counter/counter.routes').then((r) => r.COUNTER_ROUTES),
   },
+  {
+    path: 'lab',
+    loadChildren: () =>
+      import('./lab/lab.routes').then((r) => r.LAB_ROUTES),
+  }
 ];
