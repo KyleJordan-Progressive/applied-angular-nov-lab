@@ -1,37 +1,56 @@
-import { JsonPipe } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
 import {
   Component,
   ChangeDetectionStrategy,
-  inject
+  inject,
+  computed,
+  OnInit,
 } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { map } from 'rxjs';
+import { BookService } from '../services/book.service';
+import { BookInformationTableComponent } from './book-information-table.component';
+import { CenturyTimelineComponent } from './century-timeline.component';
 
 @Component({
   selector: 'app-book-list',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.Default,
-  imports: [JsonPipe],
+  imports: [CenturyTimelineComponent, BookInformationTableComponent],
   template: `
-
-    <ul>
-      @for(book of books(); track book.id) {
-      <li>
-        <pre>{{ book | json }}</pre>
-      </li>
-      }
-    </ul>
+    <div class="overflow-x-auto">
+      <app-century-timeline [bookCounts]="bookCounts()"></app-century-timeline>
+      <br />
+      <app-book-information-table [books]="books()"></app-book-information-table>
+    </div>
   `,
   styles: ``,
 })
-export class BookListComponent {
-  #client = inject(HttpClient);
-  books = toSignal(
-    this.#client
-      .get<{
-        data: { id: string; title: string; author: string; year: number }[];
-      }>("/api/books")
-      .pipe(map((res) => res.data)),
-  );
+export class BookListComponent implements OnInit {
+  bookService = inject(BookService);
+  books = this.bookService.getBooks();
+
+  ngOnInit(): void {
+    this.bookService.fetchBooks();
+  }
+
+  bookCounts = computed(() => {
+    const bookList = this.books();
+
+    const centuryMap = bookList.reduce((acc, book) => {
+      const century = this.getCentury(book.year);
+      if (!acc[century]) {
+        acc[century] = { century, count: 0 };
+      }
+      acc[century].count++;
+      return acc;
+    }, {} as { [key: number]: { century: number; count: number } });
+
+    return Object.values(centuryMap).sort((a, b) => a.century - b.century);
+  });
+
+  getCentury(year: number): number {
+    if (year % 100 === 0) {
+      return year / 100;
+    } else {
+      return Math.floor(year / 100) + 1;
+    }
+  }
 }
