@@ -1,12 +1,12 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
-import { RouterLink, RouterOutlet } from '@angular/router';
+import { RouterOutlet } from '@angular/router';
 import { BookListComponent } from './components/book-list.component';
 
 @Component({
   selector: 'app-lab',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterOutlet, RouterLink, BookListComponent],
+  imports: [RouterOutlet, BookListComponent],
   template: ` 
   <h1>Lab</h1>
   <br/>
